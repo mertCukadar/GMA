@@ -1,53 +1,67 @@
-import react from "react";
-import { Pressable, StyleSheet, TextInput } from "react-native";
-import { Button, Text, View } from "react-native";
-import { useState } from "react";
+import React, { useState } from "react";
+import { Pressable, StyleSheet, TextInput, View } from "react-native";
+import { Button, Text } from "react-native";
 import SelectDropdown from 'react-native-select-dropdown'
 
-
-
 const GreetingScreen = ({ navigation }) => {
-  const countries = ["Woman" , "Man"]
-  const [age, setAge] = useState("0");
-  const isFullFilled = true;
-  
+  const [inputValues, setInputValues] = useState({
+    age: "",
+    gender: "",
+  });
+
+  const [isFullFilled, setIsFullFilled] = useState(false);
+
+  const handleInputChange = (inputName, value) => {
+    setInputValues({
+      ...inputValues,
+      [inputName]: value,
+    });
+
+    setIsFullFilled(inputValues.age !== "" && inputValues.gender !== "");
+  };
+
+  const genderOptions = ["Woman", "Man"];
 
   return (
-  <View style={Styles.container}>
-  <View style = { Styles.InputContainer}>
-    <TextInput style = {Styles.ageInput} placeholder="Enter your age"></TextInput>
-    <SelectDropdown
-      defaultButtonText="Gender"
-      buttonStyle={{backgroundColor: 'white', borderRadius: 10, width: 200, height: 40, margin: 5,}}
-      buttonTextStyle={{fontSize: 16, color: 'black'}}
-      data={countries}
-      onSelect={(selectedItem, index) => {
-        console.log(selectedItem, index)
-      }}
-    />
-  </View>
+    <View style={styles.container}>
+      <View style={styles.inputContainer}>
+        <TextInput
+          style={styles.ageInput}
+          placeholder="Enter your age"
+          value={inputValues.age}
+          onChangeText={(value) => handleInputChange("age", value)}
+        />
+        <SelectDropdown
+          defaultButtonText="Gender"
+          buttonStyle={{ backgroundColor: 'white', borderRadius: 10, width: 200, height: 40, margin: 5, }}
+          buttonTextStyle={{ fontSize: 16, color: 'black' }}
+          data={genderOptions}
+          onSelect={(selectedItem, index) => {
+            handleInputChange("gender", selectedItem)
+          }}
+        />
+      </View>
 
-  <Pressable
-    disabled={!isFullFilled}
-    style={Styles.button}
-    title="Teste Başla"
-    onPress={() => navigation.navigate("TestScreen")}
-  >
-    <Text style={Styles.pressableText}>Teste Başla</Text>
-  </Pressable>
-  </View>
-  )
+      <Pressable
+        disabled={!isFullFilled}
+        style={styles.button}
+        onPress={() => navigation.navigate("TestScreen")}
+      >
+        <Text style={styles.pressableText}>Teste Başla</Text>
+      </Pressable>
+    </View>
+  );
 };
 
-Styles = StyleSheet.create({
+const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#fff',
     alignItems: 'center',
-    justifyContent: 'center', 
+    justifyContent: 'center',
     backgroundColor: "#EFECEC"
   },
-  InputContainer: {
+  inputContainer: {
     flexDirection: 'column',
     alignItems: 'center',
     justifyContent: 'center',
@@ -55,14 +69,6 @@ Styles = StyleSheet.create({
     padding: 10,
     justifyContent: 'center',
     borderRadius: 10,
-    
-  },
-  ageText: {
-    fontSize: 12,
-    fontWeight: 'italic',
-    alignItems: "center",
-    margin: 10,
-    
   },
   ageInput: {
     height: 40,
@@ -71,7 +77,6 @@ Styles = StyleSheet.create({
     backgroundColor: 'white',
     borderRadius: 10,
     margin: 5,
-    
   },
   button: {
     backgroundColor: 'orange',
