@@ -1,11 +1,29 @@
 import React, { useState, useEffect } from "react";
 import { Alert, StyleSheet, Text, TextInput, View } from 'react-native';
+import { useCollectLatterSensor } from "../Functions/CollectLatterSensor";
 
 const TestScreen = ({ navigation }) => {
   const [expectedText, setExpectedText] = useState("Atak Helikopter");
   const [actualText, setActualText] = useState("");
   const [time, setTime] = useState(0);
   const [timerStarted, setTimerStarted] = useState(false);
+  const [accelerometerDataList, setAccelerometerDataList] = useState([]);
+  const [sampleData , setSampleData] = useState([]);
+  
+
+  handleAccelerometerData = (accelerometerData) => {
+      const { x, y, z } = accelerometerData;
+    
+      setSampleData(sampleData => [...sampleData, accelerometerData]);
+      if (sampleData.length > 5) {
+        setSampleData([]);
+      }
+
+      setAccelerometerDataList(sampleData)
+  }; 
+  useCollectLatterSensor(handleAccelerometerData);
+
+  
 
   useEffect(() => {
     let timer;
@@ -22,9 +40,11 @@ const TestScreen = ({ navigation }) => {
 
   const handleInputChange = (value) => {
     setActualText(value);
+    
+    console.log(accelerometerDataList);
+    setSampleData([]);
 
     if (!timerStarted && value !== "") {
-      // Kullanıcı ilk kez yazmaya başladığında ve actualText boş değilse timer'ı başlat
       setTimerStarted(true);
     }
 
@@ -32,7 +52,7 @@ const TestScreen = ({ navigation }) => {
       Alert.alert("Congratulations! Time: " + time + " seconds");
       setTime(0); 
       setActualText("");
-      setTimerStarted(false); // Yazma işlemi tamamlandığında timer'ı sıfırla
+      setTimerStarted(false);
     }
   }
 

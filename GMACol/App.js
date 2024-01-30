@@ -4,7 +4,6 @@ import { createStackNavigator } from '@react-navigation/stack';
 import GreetingScreen from './src/Screens/GreetingScreen';
 import TestScreen from './src/Screens/TestScreen';
 
-
 export default function App() {
   const Stack = createStackNavigator();
   return (
