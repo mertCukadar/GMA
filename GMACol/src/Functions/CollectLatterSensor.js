@@ -9,7 +9,7 @@ export function useCollectLatterSensor(callback) {
       callback(accelerometerData);
     };
 
-    Accelerometer.setUpdateInterval(16);
+    Accelerometer.setUpdateInterval(10);
     const subscription = Accelerometer.addListener(setData);
 
     return () => {

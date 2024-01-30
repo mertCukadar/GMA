@@ -9,15 +9,16 @@ const TestScreen = ({ navigation }) => {
   const [timerStarted, setTimerStarted] = useState(false);
   const [accelerometerDataList, setAccelerometerDataList] = useState([]);
   const [sampleData , setSampleData] = useState([]);
+
+  let count = 0;
+  let letter_count = 0;
   
 
   handleAccelerometerData = (accelerometerData) => {
       const { x, y, z } = accelerometerData;
     
       setSampleData(sampleData => [...sampleData, accelerometerData]);
-      if (sampleData.length > 5) {
-        setSampleData([]);
-      }
+  
 
       setAccelerometerDataList(sampleData)
   }; 
@@ -41,7 +42,9 @@ const TestScreen = ({ navigation }) => {
   const handleInputChange = (value) => {
     setActualText(value);
     
-    console.log(accelerometerDataList);
+    letter_count = letter_count + accelerometerDataList.length;
+    count += 1;
+    console.log("mean : " + letter_count/count);
     setSampleData([]);
 
     if (!timerStarted && value !== "") {
