@@ -9,7 +9,7 @@ const GreetingScreen = ({ navigation }) => {
     gender: "",
   });
 
-  const [isFullFilled, setIsFullFilled] = useState(false);
+  const [isFullFilled, setIsFullFilled] = useState(true);
 
   const handleInputChange = (inputName, value) => {
     setInputValues({

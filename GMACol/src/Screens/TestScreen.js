@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect , useContext} from "react";
 import { Alert, StyleSheet, Text, TextInput, View } from 'react-native';
 import { Gyroscope } from "expo-sensors";
 import { Accelerometer } from "expo-sensors";
 import * as Progress from 'react-native-progress';
+import { AxiosContext } from "../Context/AxiosContext";
 
 const TestScreen = ({ navigation }) => {
   const keyboardLatters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
@@ -19,7 +20,7 @@ const TestScreen = ({ navigation }) => {
   const [gyroscopeDataList, setGyroscopeDataList] = useState([]);
   const [sensorsAvailable, setSensorsAvailable] = useState(true);
 
-
+  const { sendData , test} = useContext(AxiosContext);
 
 
 
@@ -60,7 +61,7 @@ const TestScreen = ({ navigation }) => {
             (accelerometerData) => {
               setAccelerometerDataList((prevData) => [...prevData, accelerometerData]);
             },
-            { intervalMs: 20 } // Set a larger interval, adjust as needed
+            { intervalMs: 10 } // Set a larger interval, adjust as needed
           );
         }
   
@@ -69,7 +70,7 @@ const TestScreen = ({ navigation }) => {
             (gyroscopeData) => {
               setGyroscopeDataList((prevData) => [...prevData, gyroscopeData]);
             },
-            { intervalMs: 20 } // Set a larger interval, adjust as needed
+            { intervalMs: 10 } // Set a larger interval, adjust as needed
           );
         }
       } catch (error) {
@@ -113,6 +114,7 @@ const TestScreen = ({ navigation }) => {
 
   const handleInputChange = (value) => {
     setActualText(value);
+    postData();
 
     if (!timerStarted && value !== "") {
       setTimerStarted(true);
@@ -125,11 +127,16 @@ const TestScreen = ({ navigation }) => {
     }else{
       setActualText("");
     }
+    
+  }
 
+  const postData = () => {
+    const data = {
+      accelerometerDataList,
+      gyroscopeDataList,
+    };
 
-
-   
- 
+    sendData("data/", data);
   }
 
   return (
