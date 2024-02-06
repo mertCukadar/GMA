@@ -85,6 +85,7 @@ const TestScreen = ({ navigation }) => {
     if (selectedLatters.length === 26){
       setSelectedLatters([]);
       postData(data);
+      setData([]);
       Alert.alert("Test is finished");
     }
     return randomLetter;
