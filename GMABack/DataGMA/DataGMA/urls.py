@@ -17,10 +17,12 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 from django.urls.conf import include
-from DataAPI.views import DataAPI
+
+
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('api/', include('DataAPI.urls')),   
+    path('api/', include('DataAPI.urls')),
+    path('user/' , include('UserAPI.urls'))
 ]
 
