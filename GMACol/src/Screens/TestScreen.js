@@ -2,7 +2,6 @@ import React, { useState, useEffect , useContext} from "react";
 import { Alert, StyleSheet, Text, TextInput, View } from 'react-native';
 import { Gyroscope } from "expo-sensors";
 import { Accelerometer } from "expo-sensors";
-import * as Progress from 'react-native-progress';
 import { AxiosContext } from "../Context/AxiosContext";
 
 const TestScreen = ({ navigation }) => {
@@ -11,85 +10,68 @@ const TestScreen = ({ navigation }) => {
 
   const [expectedText, setExpectedText] = useState("A");
   const [actualText, setActualText] = useState("");
-  const [timerStarted, setTimerStarted] = useState(false);
-  const [progress, setProgress] = useState(0.5);
-  const [enteredText, setEnteredText] = useState("");
 
 
-  const [accelerometerDataList, setAccelerometerDataList] = useState([]);
-  const [gyroscopeDataList, setGyroscopeDataList] = useState([]);
-  const [sensorsAvailable, setSensorsAvailable] = useState(true);
+  const [accelerometerData , setAccelerometerData] = useState({ x: 0, y: 0, z: 0 });
+  const [gyroscopeData , setGyroscopeData] = useState({ x: 0, y: 0, z: 0 });
 
-  const { sendData , test} = useContext(AxiosContext);
+  const { sendData , UserId} = useContext(AxiosContext);
 
+  const [data , setData] = useState([]);
+
+  let jsonData = {
+    UserID : 0,
+    latter: "",
+    accelX: 0,
+    accelY: 0,
+    accelZ: 0,
+    gyroX: 0,
+    gyroY: 0,
+    gyroZ: 0,
+  };
 
 
   useEffect(() => {
-    let isMounted = true;
-  
-    // Set progress bar respect to DataListLength
-    const updateProgressBar = () => {
-      if (isMounted) {
-        setProgress(accelerometerDataList.length / 50);
-  
-        if (accelerometerDataList.length > 50) {
-          cleanData();
-        }
-      }
-    };
-  
-    updateProgressBar(); // Call the function initially
-  
-    // Cleanup function to set isMounted to false when the component is unmounted
-    return () => {
-      isMounted = false;
-    };
-  }, [accelerometerDataList]); // Add accelerometerDataList to the dependency array
-  
-  
-  
-  useEffect(() => {
-    let isMounted = true;
-  
-    const setupSensors = async () => {
+  let isMounted = true;
+
+  setInterval(() => {
+    Accelerometer.setUpdateInterval(100);
+    Gyroscope.setUpdateInterval(100);
+    const startAccelerometerListener = async () => {
       try {
+        
         const accelerometerAvailable = await Accelerometer.isAvailableAsync();
-        const gyroscopeAvailable = await Gyroscope.isAvailableAsync();
-  
         if (isMounted && accelerometerAvailable) {
           const accelerometerSubscription = Accelerometer.addListener(
             (accelerometerData) => {
-              setAccelerometerDataList((prevData) => [...prevData, accelerometerData]);
+              setAccelerometerData(accelerometerData);
             },
-            { intervalMs: 10 } // Set a larger interval, adjust as needed
           );
         }
-  
+
+        const gyroscopeAvailable = await Gyroscope.isAvailableAsync();
         if (isMounted && gyroscopeAvailable) {
-          const gyroscopeSubscription = Gyroscope.addListener(
-            (gyroscopeData) => {
-              setGyroscopeDataList((prevData) => [...prevData, gyroscopeData]);
-            },
-            { intervalMs: 10 } // Set a larger interval, adjust as needed
-          );
+          const gyroscopeSubscription = Gyroscope.addListener((gyroscopeData) => {
+            setGyroscopeData(gyroscopeData);
+          });
         }
+
       } catch (error) {
-        console.error("Error setting up sensors:", error);
+        console.error('Error starting accelerometer listener:', error);
       }
     };
-  
-    setupSensors();
-  
-    return () => {
-      isMounted = false;
-    };
-  }, []); // Dependency array is empty, so it runs only once on mount
-  
+
+    startAccelerometerListener();
+  }, 1000);
   
 
+  return () => {
+    isMounted = false;
+  };
+}, []);
 
-  
 
+  // CORRECT THE FUNCTION
   const randomLetterSelector = () => {
     const randomLetter = keyboardLatters.charAt(
       Math.floor(Math.random() * keyboardLatters.length)      
@@ -102,48 +84,55 @@ const TestScreen = ({ navigation }) => {
     }
     if (selectedLatters.length === 26){
       setSelectedLatters([]);
+      postData(data);
+      Alert.alert("Test is finished");
     }
     return randomLetter;
     
   }
 
-  const cleanData = () => {
-    setAccelerometerDataList([]);
-    setGyroscopeDataList([]);
-  }
+
 
   const handleInputChange = (value) => {
-    setActualText(value);
-    postData();
-
-    if (!timerStarted && value !== "") {
-      setTimerStarted(true);
-      setExpectedText(randomLetterSelector());
+    if(value === expectedText){
+      jsonData.UserID = UserId;
+      jsonData.latter = value;
+      jsonData.accelX = accelerometerData.x;
+      jsonData.accelY = accelerometerData.y;
+      jsonData.accelZ = accelerometerData.z;
+      jsonData.gyroX = gyroscopeData.x;
+      jsonData.gyroY = gyroscopeData.y;
+      jsonData.gyroZ = gyroscopeData.z;
+      setData([...data, jsonData]);
+      randomLetterSelector();
+  
     }
-
-    if (value === expectedText) {
-      setActualText("");
-      setExpectedText(randomLetterSelector());
-    }else{
+    else{
       setActualText("");
     }
-    
   }
 
-  const postData = () => {
-    const data = {
-      accelerometerDataList,
-      gyroscopeDataList,
-    };
-
+  const postData = (data) => {
     sendData("data/", data);
   }
 
   return (
     <View style={styles.container}>
-      <Progress.Bar progress={progress} width={200} />
+      <Text>Accelerometer</Text>
       <View style={styles.expectedText}>
-        <Text>{expectedText}</Text>
+        <Text>x:{accelerometerData.x}</Text>
+        <Text>y:{accelerometerData.y}</Text>
+        <Text>z:{accelerometerData.z}</Text>
+      </View>
+      <Text>Gyroscope</Text>
+      <View style={styles.expectedText}>
+        <Text>x:{gyroscopeData.x}</Text>
+        <Text>y:{gyroscopeData.y}</Text>
+        <Text>z:{gyroscopeData.z}</Text>
+      </View>
+      <Text>Expected Text</Text>
+      <View style={styles.expectedTextt}>
+        <Text style = {{fontSize : 34 , color:"white"}}>{expectedText}</Text>
       </View>
       <View style={styles.actualText}>
         <TextInput
@@ -175,7 +164,18 @@ const styles = StyleSheet.create({
   expectedText: {
     backgroundColor: 'orange',
     width: 230,
-    height: 50,
+    height: 80,
+    padding : 10,
+    borderRadius: 10,
+    margin: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  expectedTextt: {
+    backgroundColor: 'orange',
+    width: 80,
+    height: 80,
+    padding : 10,
     borderRadius: 10,
     margin: 10,
     alignItems: 'center',
