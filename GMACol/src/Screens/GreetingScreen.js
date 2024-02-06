@@ -1,9 +1,18 @@
-import React, { useState } from "react";
+import React, { useState , useContext} from "react";
 import { Pressable, StyleSheet, TextInput, View } from "react-native";
 import { Button, Text } from "react-native";
 import SelectDropdown from 'react-native-select-dropdown'
+import { AxiosContext } from "../Context/AxiosContext";
+
+
+
+
 
 const GreetingScreen = ({ navigation }) => {
+
+  const { sendUserData , UserId} = useContext(AxiosContext);
+
+
   const [inputValues, setInputValues] = useState({
     age: "",
     gender: "",
@@ -18,6 +27,11 @@ const GreetingScreen = ({ navigation }) => {
     });
 
     setIsFullFilled(inputValues.age !== "" && inputValues.gender !== "");
+  };
+
+  const handleStartTest = () => {
+    navigation.navigate("TestScreen");
+    sendUserData("data/", inputValues);
   };
 
   const genderOptions = ["Woman", "Man"];
@@ -45,7 +59,7 @@ const GreetingScreen = ({ navigation }) => {
       <Pressable
         disabled={!isFullFilled}
         style={styles.button}
-        onPress={() => navigation.navigate("TestScreen")}
+        onPress={() => handleStartTest()}
       >
         <Text style={styles.pressableText}>Teste Başla</Text>
       </Pressable>
